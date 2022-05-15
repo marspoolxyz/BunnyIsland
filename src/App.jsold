@@ -1,0 +1,757 @@
+import logo from './logo.svg';
+import './App.css';
+import { ethers } from 'ethers';
+import { useEffect, useState } from "react";
+
+import Header from './component/Header';
+
+import Mint from './component/Mint';
+
+
+function App() {
+
+  const [walletAddress, setWalletAddress] = useState(false);
+  const [connected, setConnected] = useState(false);
+  const [chainId, setChainId] = useState(false);
+  const [chainName, setChainName] = useState(false);
+  const [message, setmessage] = useState(false);
+  const [cssClassName, setCssClassName] = useState(false);
+
+  const [walletStatus, setWalletStatus] = useState("Connect");
+
+
+  const contractAddress = "0xde8cefd1a9347ea2a6f5741d6dc44d6be195672b";
+
+
+  const abi = [
+    {
+      "inputs": [
+        {
+          "internalType": "string",
+          "name": "customBaseURI_",
+          "type": "string"
+        },
+        {
+          "internalType": "address",
+          "name": "proxyRegistryAddress_",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "owner",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "approved",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "Approval",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "owner",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "operator",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "bool",
+          "name": "approved",
+          "type": "bool"
+        }
+      ],
+      "name": "ApprovalForAll",
+      "type": "event"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "to",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "approve",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "count",
+          "type": "uint256"
+        }
+      ],
+      "name": "mint",
+      "outputs": [],
+      "stateMutability": "payable",
+      "type": "function"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "previousOwner",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "newOwner",
+          "type": "address"
+        }
+      ],
+      "name": "OwnershipTransferred",
+      "type": "event"
+    },
+    {
+      "inputs": [],
+      "name": "renounceOwnership",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "from",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "to",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "safeTransferFrom",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "from",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "to",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bytes",
+          "name": "_data",
+          "type": "bytes"
+        }
+      ],
+      "name": "safeTransferFrom",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "operator",
+          "type": "address"
+        },
+        {
+          "internalType": "bool",
+          "name": "approved",
+          "type": "bool"
+        }
+      ],
+      "name": "setApprovalForAll",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "string",
+          "name": "customBaseURI_",
+          "type": "string"
+        }
+      ],
+      "name": "setBaseURI",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "PRICE_",
+          "type": "uint256"
+        }
+      ],
+      "name": "setMintPrice",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bool",
+          "name": "saleIsActive_",
+          "type": "bool"
+        }
+      ],
+      "name": "setSaleIsActive",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "string",
+          "name": "tokenURI_",
+          "type": "string"
+        }
+      ],
+      "name": "setTokenURI",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "from",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "to",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "Transfer",
+      "type": "event"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "from",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "to",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "transferFrom",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "newOwner",
+          "type": "address"
+        }
+      ],
+      "name": "transferOwnership",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "withdraw",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "owner",
+          "type": "address"
+        }
+      ],
+      "name": "balanceOf",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "getApproved",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "owner",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "operator",
+          "type": "address"
+        }
+      ],
+      "name": "isApprovedForAll",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "MAX_MULTIMINT",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "MAX_SUPPLY",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "name",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "owner",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "ownerOf",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "PRICE",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "saleIsActive",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes4",
+          "name": "interfaceId",
+          "type": "bytes4"
+        }
+      ],
+      "name": "supportsInterface",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "symbol",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "tokenURI",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "totalSupply",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ];
+  
+ 
+   
+ 
+ 
+
+  async function requestAccount() {
+    console.log('Requesting account...');
+
+    // ❌ Check if Meta Mask Extension exists 
+    if(window.ethereum) {
+      console.log('detected');
+
+      try {
+        const accounts = await window.ethereum.request({
+          method: "eth_requestAccounts",
+        });
+        console.log(accounts[0]);
+        setWalletAddress(accounts[0]);
+        setConnected(true);
+      } catch (error) {
+        console.log('Error connecting...'+error);
+      }
+
+    } else {
+      alert('Meta Mask not detected');
+    }
+  }
+
+
+
+  async function execute() {
+    
+    if(!connected)
+    {
+      console.log("Not connected");
+      return 0;
+    }
+
+
+
+    const provider = new ethers.providers.Web3Provider(window.ethereum);
+    const signer = provider.getSigner();
+
+    const balance = await provider.getBalance(walletAddress);
+
+    console.log(balance.toString());
+
+    console.log(abi);
+
+    const contract = new ethers.Contract(contractAddress, abi, signer);
+
+    var cost = await contract.PRICE();
+
+    console.log(cost);  
+    //cost = cost * 2;
+
+
+    const balanceWei = (balance / 1000000000000000000);
+    var costWei = (cost / 1000000000000000000);
+
+    console.log(cost.toString());
+
+    if(balanceWei < costWei)
+    {
+      setmessage("Insufficient Balance");
+      setCssClassName("error");    
+      return 0;
+    }
+
+    try {
+      
+        console.log(costWei);
+        var options = {value: ethers.utils.parseEther(costWei.toString())}
+
+        /*
+        const estimation = await contract.estimateGas.mint(10, options);
+        let gasPrice = await provider.getGasPrice()
+        let  gasLimit = await contract.estimateGas.mint(10, options);
+        let transactionFee = gasPrice * gasLimit;
+        console.log(transactionFee);
+        */
+
+        const reciept = await contract.mint(1, options);
+        setmessage(reciept.hash);
+        setCssClassName("error"); 
+        
+        // const getAmount = await contract.withdraw();
+
+    } catch (error) {
+      console.log(error.code);
+      console.log(error.message);
+
+      if(error.code === "UNPREDICTABLE_GAS_LIMIT")
+      {
+        setmessage("Maximum 20 LANDS can be minted in one transaction");
+      }
+      else
+      {
+        setmessage(error.message);
+      }
+      setCssClassName("error");      
+    }     
+  }
+
+  // Create a provider to interact with a smart contract
+  async function connectWallet() {
+
+    if(walletStatus === "Connected")
+    {
+      console.log("Already connected");
+      return;
+    }
+
+    if(typeof window.ethereum !== 'undefined') {
+
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      provider.getNetwork().then((result)=>{
+        setChainId(result.chainId)
+        setChainName(result.name)
+        setWalletStatus("Connected");
+      })      
+
+      await requestAccount(); 
+    }
+  }
+
+   useEffect(() => {
+
+    console.log(walletStatus);
+    if(walletStatus.length == false)
+    {
+      console.log("i ma here walletStatus");
+      setWalletStatus("Connect");
+    }
+    
+
+    if(window.ethereum) {
+      window.ethereum.on('chainChanged', async () => {
+        //window.location.reload();
+        const provider = new ethers.providers.Web3Provider(window.ethereum);
+        provider.getNetwork().then((result)=>{
+          setChainId(result.chainId)
+          setChainName(result.name)
+          
+          if(result.chainId != 1)
+          {
+            setmessage("Wrong Network");
+            setCssClassName("error");
+          } 
+          else
+          {
+            setCssClassName("");
+            setmessage("");
+          }         
+        })
+
+      })
+      window.ethereum.on('accountsChanged', async () => {
+        setmessage("Account Id changed");
+        setCssClassName("error");        
+        await requestAccount(); 
+      })
+  }
+
+  })
+  
+  
+  return (
+    
+
+
+    <div class="App">
+
+      <Header/>
+
+
+      <header class="App-header">
+      <span id="error" class={cssClassName}>{message}</span>
+      <button onClick={connectWallet}>{walletStatus}</button>
+      <h3>Wallet Address: {walletAddress}</h3>
+
+      {connected ?  <button onClick={execute}>Execute on {chainName} {chainId}</button> : ""}
+      </header>
+      <Mint/>
+    </div>
+  );
+}
+
+export default App;
