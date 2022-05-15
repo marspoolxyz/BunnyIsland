@@ -1,0 +1,6 @@
+https://blog.logrocket.com/8-ways-deploy-react-app-free/#firebase
+sudo npm install -g firebase-tools
+firebase login
+firebase init
+npm run build
+firebase deploy
