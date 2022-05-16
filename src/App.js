@@ -608,7 +608,12 @@ function App() {
         {
           setmessage("You need to connect the MetaMask !");
           setCssClassName("error");    
-        }        
+        }  
+        else
+        {
+          setmessage(error.message);
+          setCssClassName("error");           
+        }      
         consoleMessage('Error connecting...'+error);
       }
 
