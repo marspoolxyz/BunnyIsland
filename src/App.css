@@ -46,6 +46,18 @@ button {
   font-weight: bold;
 }
 
+.showdisplay
+{
+  font-size: 16px;
+  padding: 16px;
+  border-radius: 16px;
+  color: #cc0000;
+  font-weight: bold;
+}
+.hidedisplay
+{
+  visibility: hidden;
+}
 .error {
   font-size: 16px;
   padding: 16px;

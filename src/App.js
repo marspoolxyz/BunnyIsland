@@ -22,9 +22,16 @@ function App() {
 
   const [walletStatus, setWalletStatus] = useState("Connect");
 
+  const [totalSupply, setTotalSupply] = useState(0);
+  const [supplyCss, setSupplyCss] = useState("hidedisplay");
+  const [adminCss, setAdminCss] = useState("hidedisplay");
 
-  const contractAddress = "0xde8cefd1a9347ea2a6f5741d6dc44d6be195672b";
-  const mainNet = false;
+  //0xde8ceFd1a9347eA2A6F5741D6DC44d6bE195672B
+  //0xee75be79361c78e8235d41168738d0c842cf154a
+  //0x419565f607C13af946A117ebCd66eAaFE992DB5F
+  const MAX_SUPPLY = 5555;
+  const contractAddress = "0xd51cd9dacdcf9a1de148c129cc32c40ddf658cea";
+  const mainNet = true;
   var isExecutionRequired = false;
 
 
@@ -571,34 +578,44 @@ function App() {
     }
   ];
   
- 
-   
- 
- 
-
   async function requestAccount() {
-    consoleMessage('Requesting account...');
+    consoleMessage("580" + 'Requesting account...');
+
+    setAdminCss("hidedisplay");
 
     // ❌ Check if Meta Mask Extension exists 
     if(window.ethereum) {
-      consoleMessage('detected');
 
       try {
         const accounts = await window.ethereum.request({
           method: "eth_requestAccounts",
         });
-        consoleMessage(accounts[0]);
+        consoleMessage("590"+accounts[0]);
         if(walletAddress !== "")
         {
           setIsAccountChanged(true);
         }        
+
+        if(accounts[0] === walletAddress)
+        {
+          setmessage("");
+          setCssClassName(""); 
+        }
+
+
         setWalletAddress(accounts[0]);
         setWalletStatus("Connected");
 
-        setmessage("");
-        setCssClassName(""); 
 
 
+        if(accounts[0] === "0x6470c4d86b062ff4e1030d5615c4b04cd78bf9cf") //Main Net
+        {
+          setAdminCss("showdisplay");
+        }
+        else
+        {
+          setAdminCss("hidedisplay");
+        }
 
         setConnected(true);
       } catch (error) {
@@ -614,7 +631,7 @@ function App() {
           setmessage(error.message);
           setCssClassName("error");           
         }      
-        consoleMessage('Error connecting...'+error);
+        consoleMessage('617 Error connecting...'+error);
       }
 
     } else {
@@ -637,13 +654,30 @@ function App() {
     error.innerHTML = msg;
 
   }
+  async function withdrawEth() {
+
+    try{
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      const signer = provider.getSigner();
+      const balance = await provider.getBalance(walletAddress);
+  
+      const contract = new ethers.Contract(contractAddress, abi, signer);
+  
+      var cost = await contract.withdraw();    
+    }
+    catch(e)
+    {
+      console.log(e);
+    }
+
+  }
   async function execute() {
     
     setmessage("");
     setCssClassName("");       
     if(!connected)
     {
-      consoleMessage("Not connected");
+      consoleMessage(" 646 Not connected");
       setmessage("You need to connect the MetaMask !");
       setCssClassName("error");       
       return 0;
@@ -658,24 +692,85 @@ function App() {
 
     const provider = new ethers.providers.Web3Provider(window.ethereum);
     const signer = provider.getSigner();
-
     const balance = await provider.getBalance(walletAddress);
-
-    consoleMessage(balance.toString());
-    consoleMessage(abi);
 
     const contract = new ethers.Contract(contractAddress, abi, signer);
 
     var cost = await contract.PRICE();
 
-    consoleMessage(cost);  
+    consoleMessage("671"+ cost);  
     //cost = cost * 2;
+
+    var counterTag = document.getElementById("counter");
+    var NFTCount = 1;
+    try{
+      NFTCount = Number.parseInt(counterTag.innerHTML);
+    }
+    catch(e)
+    {
+      NFTCount = 1;
+    }
+
 
 
     const balanceWei = (balance / 1000000000000000000);
     var costWei = (cost / 1000000000000000000);
+    var OneNFTCost = costWei;
 
-    consoleMessage(cost.toString());
+    costWei = OneNFTCost * NFTCount;
+
+    consoleMessage("691 " + OneNFTCost);
+
+
+    consoleMessage("694 " + balanceWei.toString());
+    consoleMessage("695 " + costWei.toString());
+
+    
+
+
+    if(balanceWei < costWei) // User selected Number of NFT is not buyable
+    {
+      consoleMessage("703 " + (balanceWei/OneNFTCost));
+
+      consoleMessage("702 " + "Less balance or insufficient balance" );
+      var minNFTCan = ((balanceWei/OneNFTCost));
+
+      if(minNFTCan < 2 && minNFTCan > 1.1)
+      {
+        NFTCount = 1;
+        minNFTCan =1;
+        consoleMessage("711 " + minNFTCan);
+        costWei = OneNFTCost * minNFTCan;
+      }
+      else
+      {
+        minNFTCan = Math.round(minNFTCan,2)   - 1;
+        NFTCount  =  Math.round(minNFTCan,2)  - 1;
+      }
+
+      consoleMessage("704 " + minNFTCan);
+
+      if(minNFTCan >= 1)
+      {
+        counterTag.innerHTML = minNFTCan;
+        costWei = OneNFTCost * minNFTCan;   
+        NFTCount =  minNFTCan; 
+        setCounter(minNFTCan);
+
+        const icp = document.getElementById("icp");
+
+        if(costWei.length === 3)
+          icp.innerHTML = "Total "+ costWei.toString()  + "0 Eth";
+        else
+          icp.innerHTML = "Total "+ costWei.toString()  + " Eth";
+        
+        
+      }
+    }
+
+
+    consoleMessage("711 " + costWei.toString());
+    consoleMessage("712 " + balanceWei.toString());
 
     if(balanceWei < costWei)
     {
@@ -698,22 +793,10 @@ function App() {
         consoleMessage(transactionFee);
         */
 
-        const counterTag = document.getElementById("counter");
-        var NFTCount = 1;
-        try{
-          NFTCount = Number.parseInt(counterTag.innerHTML);
-        }
-        catch(e)
-        {
-          NFTCount = 1;
-        }
 
-        consoleMessage(costWei);
-
-        costWei = costWei * NFTCount;
 
         var options = {value: ethers.utils.parseEther(costWei.toString())}
-        consoleMessage(options);
+        consoleMessage("716" + options);
         const reciept = await contract.mint(NFTCount, options);
 
         var link ="";
@@ -725,18 +808,23 @@ function App() {
         {
           link = "<br><a target='_' href='https://rinkeby.etherscan.io/tx/" + reciept.hash + ">Hash</a>"
         }
-        setmessage("Transaction Successful " + link);
+        setmessage("Transaction Submitted " + link);
         setCssClassName("error"); 
         
         // const getAmount = await contract.withdraw();
 
     } catch (error) {
-      consoleMessage(error.code);
-      consoleMessage(error.message);
+      consoleMessage("734" +error.code);
+      consoleMessage("735" + error.message);
 
       if(error.code === "UNPREDICTABLE_GAS_LIMIT")
       {
-        setmessage("Maximum 20 LANDS can be minted in one transaction");
+        //setmessage("Maximum 20 LANDS can be minted in one transaction");
+        setmessage("Mint is not live yet");
+      }
+      else if(error.code === "INSUFFICIENT_FUNDS")
+      {
+        setmessage("Insufficient Funds!");
       }
       else
       {
@@ -773,8 +861,12 @@ function App() {
 
       if(count <= 1) count =1;
       icps = count * cost;
-    
+
       var icpstring = icps + "";
+      var with2Decimals = icpstring.substring(0, 5);
+      icps = parseFloat(with2Decimals);
+      icpstring = icps + "";         
+    
       var leng = icpstring.length;  
       if(leng === 3)
       {
@@ -785,8 +877,7 @@ function App() {
         icp.innerHTML = "Total " + icps + " Eth";
       }
       counterTag.innerHTML = count;    
-      setCounter(count)
-  
+      setCounter(count)  
   }
 
   function handleIncrement() 
@@ -806,6 +897,10 @@ function App() {
       icps = count * cost;
     
       var icpstring = icps + "";
+      var with2Decimals = icpstring.substring(0, 5);
+      icps = parseFloat(with2Decimals); 
+      icpstring = icps + "";  
+
       var leng = icpstring.length;
     
       if(leng === 3)
@@ -817,7 +912,7 @@ function App() {
         icp.innerHTML = "Total " + icps + " Eth";
       }
       counterTag.innerHTML = count;    
-      consoleMessage(count);
+      consoleMessage("820" + count);
 
       setCounter(count)
   }
@@ -825,9 +920,17 @@ function App() {
   // Create a provider to interact with a smart contract
   async function connectWallet() {
 
+    if(walletAddress === "0xe98b997f529f643bc67f217b1270a0f7d7a0ecb2")
+    {
+      setAdminCss("showdisplay");
+    }
+    else
+    {
+      setAdminCss("hidedisplay");
+    }    
     if(walletStatus === "Connected")
     {
-      consoleMessage("Already connected");
+      consoleMessage("830"+ "Already connected");
       return;
     }
 
@@ -843,9 +946,29 @@ function App() {
     }
   }
 
+  const getData = async () => {
+     
+        const provider = new ethers.providers.Web3Provider(window.ethereum);
+        const signer = provider.getSigner();
+        const contract = new ethers.Contract(contractAddress, abi, signer);
+    
+        var cost = await contract.totalSupply();
+        
+        var costString = cost + "";
+        setTotalSupply(parseInt(costString));
+
+        if(parseInt(costString) > 500)
+        {
+          setSupplyCss("showdisplay");
+        }
+  }
+  //getData();
+  setInterval(getData, 60*100);
+
+
    useEffect(() => {
 
-    consoleMessage(walletStatus);
+    consoleMessage("848 " + walletStatus);
     if(walletStatus.length === false)
     {
       setWalletStatus("Connect");
@@ -887,6 +1010,7 @@ function App() {
         {
           setmessage("Account Id changed");
           setCssClassName("error");  
+         
         }      
         await requestAccount(); 
       })
@@ -923,10 +1047,12 @@ function App() {
                                         <div class="details_box">
                                             <p class="w-75 m-auto">Only 5,555 LAND NFTs available in Ethereum Blockchain</p>
                                             <p class="w-75 m-auto">LAND Owners get airdrop of ICP NFTs, own property in the Meta-verse.</p>
-                                            <p class="icp" id="cost" hidden>0.08</p>
+                                            <p class="icp" id="cost" hidden>0.05</p>
                                         </div>
                                     </div>
-                                    </div>                        
+                                    </div> 
+
+                                    
                                     <div class="col-3 text-center">
                                     <div class="walet">
                                         <h5>CONNECT USING</h5>
@@ -949,10 +1075,16 @@ function App() {
                                <span id="error" class={cssClassName}></span>
 
                                 <h4>Your Wallet</h4> 
-                                <div class="mt-1">
-                                    
+                                <div class="mt-1">                                    
                                     <span>{walletAddress}</span>
                                 </div>
+                                
+                                <div class={adminCss}>                                                                    
+                                  <button onClick={withdrawEth} class="custom-btn" id="withdraweth">Withdraw</button>
+                                </div>                                   
+                                <div class={supplyCss}>                                                                    
+                                    <span>{totalSupply}/5555 LANDS 🏝️</span>
+                                </div>                                
                             </div>
                             <div class="counter_box">
                                 <p class="heading">No of LANDs</p>
@@ -968,7 +1100,7 @@ function App() {
                     <div class="container">
                         <div class="row">
                         <div class="col-md-12">
-                            <button onClick={execute} class="custom-btn" id="icp">Total 0.08 Eth</button>
+                            <button onClick={execute} class="custom-btn" id="icp">Total 0.05 Eth</button>
                             <div class="mx-auto text-center mb-5  mt-5">
                                 <img class="img-responsive gif_img" alt="Lands" src="lands/land.gif"/>
                             </div>
@@ -979,11 +1111,6 @@ function App() {
                     <RoadMap></RoadMap>
                     </div>
                 </div>
-
-
-
-
-
     </div>
   );
 }

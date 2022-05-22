@@ -19,8 +19,8 @@ class RoadMap extends Component {
                                     <div class="col-md-6">
                                         <div class="test_detl_box pe-3">
                                             <div class="details_box">
-                                                <h3>Inhibit</h3>
-                                                <p>Inhibit LANDs from the 5 areas</p>
+                                                <h3>Inhabit</h3>
+                                                <p>Inhabit LANDs from the 5 areas</p>
                                             </div>
                                         </div>
                                     </div>

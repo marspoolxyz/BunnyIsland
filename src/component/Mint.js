@@ -23,6 +23,9 @@ class Mint extends Component {
   
         if(count <= 1) count =1;
         icps = count * cost;
+
+        var with2Decimals = icps.substring(0, 3);
+        icps = parseFloat(with2Decimals);        
       
         var icpstring = icps + "";
         var leng = icpstring.length;  
@@ -51,6 +54,9 @@ class Mint extends Component {
           count++;
         }
         icps = count * cost;
+
+        var with2Decimals = icps.substring(0, 3);
+        icps = parseFloat(with2Decimals);        
       
         var icpstring = icps + "";
         var leng = icpstring.length;

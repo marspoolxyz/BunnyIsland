@@ -28,7 +28,7 @@ class Header extends Component {
                                     <div class="collapse navbar-collapse" id="navbarNav">
                                         <ul class="navbar-nav">
                                         <li class="nav-item">
-                                            <a class="nav-link active" aria-current="page" href="https://bit.ly/TheBunnyIsland">The Map</a>
+                                            <a class="nav-link active" aria-current="page" href="https://bit.ly/TheBunnyIsland">The Map 🗺️</a>
                                         </li>
                                         </ul>
 
@@ -37,9 +37,14 @@ class Header extends Component {
                                         </ul> 
                                         <ul class="navbar-nav">
                                         <li class="nav-item">
-                                            <a href="https://opensea.io/collection/BunnyIsland"><img width="25" height="25" src="images/opensea.png" /></a>
+                                            <a href="https://opensea.io/collection/thebunnyisland" target='opensea'>&nbsp;<img width="25" height="25" src="images/opensea.png" /></a>
                                         </li>
-                                        </ul>                        
+                                        </ul>    
+                                        <ul class="navbar-nav">
+                                        <li class="nav-item">
+                                            <a href="https://raritysniper.com/nft-drops-calendar" target='raritysniper'>&nbsp;<img width="25" height="25" src="images/raritysniper.png" /></a>
+                                        </li>
+                                        </ul>                                                               
                                     </div>
                                     </nav>
                             </div>
